@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>ESP8266 LCD 제어</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 1rem 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .status {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ESP8266 LCD 메시지 전송</h2>
+    <input type="text" id="msg" placeholder="메시지를 입력하세요" />
+    <button onclick="sendMessage()">전송</button>
+    <div class="status" id="status">🔌 MQTT 연결 중...</div>
+  </div>
+
+  <script>
+    const client = mqtt.connect("wss://783c3dc7063d42479734a1f74cf84142.s1.eu.hivemq.cloud:8884", {
+      username: "esp8266user",
+      password: "dhksfygoTdj"
+    });
+
+    client.on("connect", () => {
+      document.getElementById("status").innerText = "✅ MQTT 연결됨";
+    });
+
+    client.on("error", (err) => {
+      document.getElementById("status").innerText = "❌ 연결 실패: " + err.message;
+    });
+
+    function sendMessage() {
+      const msg = document.getElementById("msg").value;
+      if (msg.trim()) {
+        client.publish("esp/lcd/message", msg);
+        document.getElementById("status").innerText = "📤 전송됨: " + msg;
+      }
+    }
+  </script>
+</body>
+</html>
