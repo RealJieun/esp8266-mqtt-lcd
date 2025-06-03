@@ -19,6 +19,7 @@
       margin: 0;
       padding: 1rem;
     }
+
     .container {
       background: #ffeaf4;
       padding: 2rem;
@@ -28,18 +29,23 @@
       width: 340px;
       text-align: center;
       border: 3px dashed #ff9ec7;
+      box-sizing: border-box;
     }
+
     h2 {
       color: #ff3399;
       margin-bottom: 1rem;
       font-size: 1.4rem;
     }
+
     .lcd-input {
-      display: grid;
-      grid-template-columns: repeat(16, 1fr);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 4px;
       margin-bottom: 1rem;
     }
+
     .lcd-input input {
       width: 1.8rem;
       height: 2rem;
@@ -48,12 +54,15 @@
       font-size: 1rem;
       border-radius: 5px;
       border: 1px solid #ffc0cb;
+      box-sizing: border-box;
     }
+
     .lcd-input input:focus {
       outline: none;
       border-color: #ff69b4;
       background: #fff0f5;
     }
+
     button {
       background: #ff66b2;
       color: white;
@@ -65,9 +74,11 @@
       margin-top: 1rem;
       transition: 0.2s;
     }
+
     button:hover {
       background: #ff3385;
     }
+
     .status {
       margin-top: 1rem;
       font-size: 0.9rem;
