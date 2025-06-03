@@ -16,7 +16,7 @@
       font-family: 'Jua', sans-serif;
       background: #fff9fb;
       margin: 0;
-      padding: 1rem;
+      padding: 0.5rem;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -25,34 +25,34 @@
 
     .container {
       background: #ffeaf4;
-      padding: 2rem;
+      padding: 1.2rem;
       border: 3px dashed #ff9ec7;
       border-radius: 20px;
       text-align: center;
       width: 100%;
-      max-width: 95vw;
+      max-width: 420px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     h2 {
       color: #ff3399;
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
     }
 
     .lcd-input {
       display: grid;
       grid-template-columns: repeat(16, minmax(1.2rem, 1fr));
-      gap: 4px;
-      margin-bottom: 1.5rem;
+      gap: 2px; /* 간격 최소화 */
+      margin-bottom: 1.2rem;
     }
 
     .lcd-input input {
       width: 100%;
       aspect-ratio: 1 / 2; /* 가로:세로 = 1:2 */
-      font-size: clamp(0.8rem, 1.2vw, 1rem);
+      font-size: clamp(0.7rem, 1vw, 1rem);
       text-align: center;
-      border-radius: 5px;
+      border-radius: 4px;
       border: 1px solid #ffc0cb;
       background-color: white;
     }
@@ -67,8 +67,8 @@
       background: #ff66b2;
       color: white;
       border: none;
-      padding: 0.6rem 1.2rem;
-      font-size: 1.1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
       border-radius: 10px;
       cursor: pointer;
       transition: 0.2s;
@@ -80,9 +80,35 @@
 
     .status {
       margin-top: 1rem;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #555;
       word-break: break-word;
+    }
+
+    @media (max-width: 400px) {
+      .container {
+        padding: 0.8rem;
+        max-width: 95vw;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+      }
+
+      .lcd-input {
+        gap: 1px;
+        margin-bottom: 1rem;
+      }
+
+      .lcd-input input {
+        font-size: 0.8rem;
+      }
+
+      button {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -102,12 +128,10 @@
       input.setAttribute("maxlength", "1");
       input.dataset.index = i;
 
-      // 한글 문자만 차단 (유니코드 '가' ~ '힣' 범위)
+      // 한글 입력 차단
       input.addEventListener("beforeinput", (e) => {
         const char = e.data;
-        if (!char) return;
-
-        if (/[\uAC00-\uD7A3]/.test(char)) {
+        if (char && /[\uAC00-\uD7A3]/.test(char)) {
           e.preventDefault();
         }
       });
@@ -116,13 +140,11 @@
         const val = e.target.value;
         const idx = parseInt(e.target.dataset.index);
 
-        // 한글 입력은 무효 처리
         if (/[\uAC00-\uD7A3]/.test(val)) {
           e.target.value = "";
           return;
         }
 
-        // 다음 칸으로 이동
         if (val && idx < 31) {
           lcdContainer.children[idx + 1].focus();
         }
@@ -130,8 +152,6 @@
 
       input.addEventListener("keydown", (e) => {
         const idx = parseInt(e.target.dataset.index);
-
-        // 한글 조합 키 방지
         if (e.key === "Process") {
           e.preventDefault();
           return;
@@ -150,7 +170,6 @@
       lcdContainer.appendChild(input);
     }
 
-    // MQTT 연결
     const client = mqtt.connect("wss://783c3dc7063d42479734a1f74cf84142.s1.eu.hivemq.cloud:8884/mqtt", {
       username: "esp8266user",
       password: "Esp123456"
@@ -164,7 +183,6 @@
       document.getElementById("status").innerText = "❌ 연결 실패: " + err.message;
     });
 
-    // 메시지 전송
     function sendMessage() {
       const inputs = document.querySelectorAll(".lcd-input input");
       let msg = "";
