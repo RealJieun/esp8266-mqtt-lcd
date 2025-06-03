@@ -2,59 +2,85 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>ESP8266 LCD 제어</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨ ESP8266 LCD 메시지 전송</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f4f9;
+      font-family: 'Jua', sans-serif;
+      background: #fff9fb;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
       margin: 0;
+      padding: 1rem;
     }
     .container {
-      background: white;
+      background: #ffeaf4;
       padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 300px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 100%;
+      width: 340px;
       text-align: center;
+      border: 3px dashed #ff9ec7;
     }
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      margin: 1rem 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+    h2 {
+      color: #ff3399;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+    }
+    .lcd-input {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 4px;
+      margin-bottom: 1rem;
+    }
+    .lcd-input input {
+      width: 1.8rem;
+      height: 2rem;
+      padding: 0;
+      text-align: center;
       font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ffc0cb;
+    }
+    .lcd-input input:focus {
+      outline: none;
+      border-color: #ff69b4;
+      background: #fff0f5;
     }
     button {
-      background: #4CAF50;
+      background: #ff66b2;
       color: white;
       border: none;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      border-radius: 5px;
+      padding: 0.6rem 1.2rem;
+      font-size: 1.1rem;
+      border-radius: 10px;
       cursor: pointer;
+      margin-top: 1rem;
+      transition: 0.2s;
     }
     button:hover {
-      background: #45a049;
+      background: #ff3385;
     }
     .status {
       margin-top: 1rem;
       font-size: 0.9rem;
-      color: gray;
+      color: #666;
+      word-break: break-word;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>ESP8266 LCD 메시지 전송</h2>
-    <input type="text" id="msg" placeholder="메시지를 입력하세요" />
-    <button onclick="sendMessage()">전송</button>
+    <h2>💓영어로 메세지를 전달해봐</h2>
+    <div class="lcd-input" id="lcdInputs"></div>
+    <button onclick="sendMessage()">📨 전송</button>
     <div class="status" id="status">🔌 MQTT 연결 중...</div>
   </div>
 
@@ -65,18 +91,34 @@
     });
 
     client.on("connect", () => {
-      document.getElementById("status").innerText = "✅ MQTT 연결됨";
+      document.getElementById("status").innerText = "📆 MQTT 연결 성공!";
     });
 
     client.on("error", (err) => {
       document.getElementById("status").innerText = "❌ 연결 실패: " + err.message;
     });
 
+    const lcdContainer = document.getElementById("lcdInputs");
+    for (let i = 0; i < 32; i++) {
+      const input = document.createElement("input");
+      input.setAttribute("maxlength", "1");
+      input.dataset.index = i;
+      input.addEventListener("input", (e) => {
+        const idx = parseInt(e.target.dataset.index);
+        if (e.target.value && idx < 31) {
+          lcdContainer.children[idx + 1].focus();
+        }
+      });
+      lcdContainer.appendChild(input);
+    }
+
     function sendMessage() {
-      const msg = document.getElementById("msg").value;
+      const inputs = document.querySelectorAll(".lcd-input input");
+      let msg = "";
+      inputs.forEach(input => msg += input.value || " ");
       if (msg.trim()) {
         client.publish("esp/lcd/message", msg);
-        document.getElementById("status").innerText = "📤 전송됨: " + msg;
+        document.getElementById("status").innerText = "📢 전송됨: " + msg;
       }
     }
   </script>
