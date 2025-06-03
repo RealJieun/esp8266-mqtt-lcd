@@ -42,15 +42,15 @@
 
     .lcd-input {
       display: grid;
-      grid-template-columns: repeat(16, minmax(1.4rem, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(16, minmax(1.2rem, 1fr));
+      gap: 4px;
       margin-bottom: 1.5rem;
     }
 
     .lcd-input input {
       width: 100%;
-      aspect-ratio: 1 / 1;
-      font-size: clamp(0.8rem, 1.5vw, 1rem);
+      aspect-ratio: 1 / 2; /* 가로:세로 = 1:2 */
+      font-size: clamp(0.8rem, 1.2vw, 1rem);
       text-align: center;
       border-radius: 5px;
       border: 1px solid #ffc0cb;
@@ -102,8 +102,12 @@
       input.setAttribute("maxlength", "1");
       input.dataset.index = i;
 
+      // 한글 문자만 차단 (유니코드 '가' ~ '힣' 범위)
       input.addEventListener("beforeinput", (e) => {
-        if (e.data && !/^[a-zA-Z0-9]$/.test(e.data)) {
+        const char = e.data;
+        if (!char) return;
+
+        if (/[\uAC00-\uD7A3]/.test(char)) {
           e.preventDefault();
         }
       });
@@ -112,11 +116,13 @@
         const val = e.target.value;
         const idx = parseInt(e.target.dataset.index);
 
-        if (!/^[a-zA-Z0-9]$/.test(val)) {
+        // 한글 입력은 무효 처리
+        if (/[\uAC00-\uD7A3]/.test(val)) {
           e.target.value = "";
           return;
         }
 
+        // 다음 칸으로 이동
         if (val && idx < 31) {
           lcdContainer.children[idx + 1].focus();
         }
@@ -124,6 +130,8 @@
 
       input.addEventListener("keydown", (e) => {
         const idx = parseInt(e.target.dataset.index);
+
+        // 한글 조합 키 방지
         if (e.key === "Process") {
           e.preventDefault();
           return;
@@ -142,6 +150,7 @@
       lcdContainer.appendChild(input);
     }
 
+    // MQTT 연결
     const client = mqtt.connect("wss://783c3dc7063d42479734a1f74cf84142.s1.eu.hivemq.cloud:8884/mqtt", {
       username: "esp8266user",
       password: "Esp123456"
@@ -155,6 +164,7 @@
       document.getElementById("status").innerText = "❌ 연결 실패: " + err.message;
     });
 
+    // 메시지 전송
     function sendMessage() {
       const inputs = document.querySelectorAll(".lcd-input input");
       let msg = "";
